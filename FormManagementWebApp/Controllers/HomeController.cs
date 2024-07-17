@@ -1,9 +1,12 @@
 using System.Diagnostics;
+using System.Security.Claims;
 using AspNetCoreHero.ToastNotification.Abstractions;
 using FormManagementWebApp.Data;
 using Microsoft.AspNetCore.Mvc;
 using FormManagementWebApp.Models;
 using FormManagementWebApp.Models.Domain;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FormManagementWebApp.Controllers;
 
@@ -32,6 +35,7 @@ public class HomeController : Controller
     
     
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> LoginPost(RegisterViewModel registerReq)
     {
         if (ModelState.IsValid)
@@ -42,7 +46,14 @@ public class HomeController : Controller
                 user.IsLoggedIn = true;
                 await _context.SaveChangesAsync();
                 _notyf.Success("User logged in successfully!");
-                return RedirectToAction("Index");
+                
+                HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, user.Username),
+                    new Claim(ClaimTypes.Email, user.Email),
+                }, CookieAuthenticationDefaults.AuthenticationScheme));
+                
+                return RedirectToAction("Form", "Form");
             }
             else
             {

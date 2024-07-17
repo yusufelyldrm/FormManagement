@@ -1,5 +1,6 @@
 using AspNetCoreHero.ToastNotification;
 using FormManagementWebApp.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,10 +8,20 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<FormDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DefaultConnection"
-    )));
+        builder.Configuration.GetConnectionString("DefaultConnection"
+        )))
+    ;
 
-builder.Services.AddNotyf(config=> { config.DurationInSeconds = 10;config.IsDismissable = true;config.Position = NotyfPosition.BottomRight; });;
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options => { options.LoginPath = "/Home/Login"; });
+
+builder.Services.AddNotyf(config =>
+{
+    config.DurationInSeconds = 10;
+    config.IsDismissable = true;
+    config.Position = NotyfPosition.BottomRight;
+});
+;
 
 var app = builder.Build();
 

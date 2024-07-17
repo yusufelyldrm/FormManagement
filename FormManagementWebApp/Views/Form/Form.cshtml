@@ -5,31 +5,163 @@
     Layout = "_Layout";
 }
 
-<h2>Forms</h2>
+<div class="container mt-5">
+    <h1 class="mb-4">Forms</h1>
 
-<a class="btn btn-primary">Form Oluştur</a>
+    <div class="input-group mb-3">
+        <input type="text" id="searchInput" class="form-control" placeholder="Search forms by name...">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" type="button" onclick="searchForms()">Search</button>
+        </div>
+    </div>
 
-<table class="table">
-    <thead>
+    <table id="formsTable" class="table table-bordered">
+        <thead class="thead-dark">
         <tr>
             <th>Id</th>
-            <th>Form Name</th>
+            <th>Name</th>
             <th>Description</th>
-            <th>Created Date</th>
+            <th>Created At</th>
             <th>Created By</th>
         </tr>
-    </thead>
-    <tbody>
+        </thead>
+        <tbody>
         @foreach (var form in Model)
         {
             <tr>
                 <td>@form.Id</td>
                 <td>@form.Name</td>
                 <td>@form.Description</td>
-                <td>@form.CreatedAt.ToString("yyyy-MM-dd")</td>
+                <td>@form.CreatedAt</td>
                 <td>@form.CreatedBy</td>
             </tr>
         }
-    </tbody>
-</table>
-}
+        </tbody>
+    </table>
+
+    <h2 class="mt-5">Create New Form</h2>
+    <form id="createForm">
+        <div class="form-group">
+            <label for="formName">Form Name:</label>
+            <input type="text" class="form-control" id="formName" name="formName" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="formDescription">Form Description:</label>
+            <input type="text" class="form-control" id="formDescription" name="formDescription">
+        </div>
+        
+        <div id="field-container" class="mb-3"></div>
+        <button type="button" class="btn btn-secondary" onclick="addField()">Add Field</button><br/>
+        <button type="button" class="btn btn-primary mt-3" onclick="createFormJson()">Create Form</button>
+    </form>
+</div>
+
+<script>
+        function addField() {
+            const fieldContainer = document.getElementById('field-container');
+            const fieldDiv = document.createElement('div');
+            fieldDiv.classList.add('form-group', 'row', 'mt-2');
+
+            fieldDiv.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="fieldName" placeholder="Field Name" required>
+                </div>
+                <div class="col-md-3">
+                    <select name="fieldType" class="form-control">
+                        <option value="STRING">STRING</option>
+                        <option value="NUMBER">NUMBER</option>
+                    </select>
+                </div>
+                <div class="col-md-2 form-check">
+                    <input type="checkbox" class="form-check-input" name="fieldRequired">
+                    <label class="form-check-label" for="fieldRequired">Required</label>
+                </div>
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-danger" onclick="removeField(this)">Remove</button>
+                </div>
+            `;
+            
+            fieldContainer.appendChild(fieldDiv);
+        }
+
+        function removeField(button) {
+            button.parentElement.parentElement.remove();
+        }
+
+        async function createFormJson() {
+            const formName = document.getElementById('formName').value;
+            const formDescription = document.getElementById('formDescription').value;
+            const fields = [];
+    
+            document.querySelectorAll('#field-container .form-group').forEach((fieldDiv) => {
+                const fieldName = fieldDiv.querySelector('input[name="fieldName"]').value;
+                const fieldType = fieldDiv.querySelector('select[name="fieldType"]').value;
+                const fieldRequired = fieldDiv.querySelector('input[name="fieldRequired"]').checked;
+    
+                fields.push({
+                    name: fieldName,
+                    dataType: fieldType,
+                    required: fieldRequired
+                });
+            });
+    
+            const formJson = {
+                name: formName,
+                description: formDescription,
+                fields: fields
+            };
+    
+            try {
+                const response = await fetch('/api/Form/CreateForm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formJson)
+                });
+    
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log(result);
+                    alert('Form created successfully');
+                }
+            } catch (error) {
+                console.error('Error:', error); 
+                alert('Failed to create form');
+            }
+        }
+
+        async function searchForms() {
+            const searchQuery = document.getElementById('searchInput').value;
+            
+            try {
+                const response = await fetch(`/api/Form/Search?query=${encodeURIComponent(searchQuery)}`);
+                
+                if (response.ok) {
+                    const forms = await response.json()
+                    updateFormsTable(forms);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to search forms');
+            }
+        }
+
+        function updateFormsTable(forms) {
+            const tbody = document.querySelector('#formsTable tbody');
+            tbody.innerHTML = '';
+
+            forms.forEach(form => {
+                const row = `<tr>
+                                <td>${form.id}</td>
+                                <td>${form.name}</td>
+                                <td>${form.description}</td>
+                                <td>${form.createdAt}</td>
+                                <td>${form.createdBy}</td>
+                            </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+        
+    </script>
