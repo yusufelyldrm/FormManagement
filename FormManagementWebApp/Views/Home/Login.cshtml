@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "Login Page";
+}
+
+@model RegisterViewModel
+
+<h1>@ViewData["Title"]</h1>
+
+<style>
+  .btn-primary-login {
+    margin-top: 10px;
+    background-color: #0a53be;
+    border-color: #0a53be;
+    color: white;
+  }
+  
+  .register {
+    margin-top: 10px;
+  }
+  
+  .register-link {
+    color: #0a53be;
+    cursor: pointer;
+  }
+  
+  .username-field {
+    display: none; /* Başlangıçta gizli tutuyoruz */
+  }
+</style>
+
+<body>
+<form id="loginForm" method="post" action="LoginPost">
+  <div class="form-group">
+    <label for="email">Email address</label>
+    <input type="email" class="form-control" id="email" aria-describedby="emailHelp" placeholder="Enter email" required="required" asp-for="Email">
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" class="form-control" id="password" placeholder="Password" required="required" asp-for="Password">
+  </div>
+  
+  <div class="form-group username-field">
+    <label for="username">Username</label>
+    <input type="text" class="form-control" id="username" placeholder="Enter username" asp-for="Username">
+  </div>
+  
+  <p class="register">Not a member? <a href="#" class="register-link">Register</a></p>
+  
+  <button type="submit" class="btn btn-primary-login">Submit</button>
+</form>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<script>
+  $(document).ready(function() {
+    $(".register-link").click(function(e) {
+      e.preventDefault();
+      
+      // Toggle between login and register state
+      if ($("#loginForm").attr("action") === "LoginPost") {
+        // Switch to register form
+        $("#loginForm").attr("action", "RegisterPost");
+        $("label[for='email']").text("Email address");
+        $("#email").attr("placeholder", "Enter new email");
+        $("label[for='password']").text("Password");
+        $("#password").attr("placeholder", "Enter new password");
+        $(".username-field").show(); // Username alanını göster
+        $(".register").html("Already a member? <a href='' class='register-link'>Login</a>");
+        $(".btn-primary-login").text("Register");
+      } else {
+        // Switch back to login form
+        $("#loginForm").attr("action", "LoginPost");
+        $("label[for='email']").text("Email address");
+        $("#email").attr("placeholder", "Enter email");
+        $("label[for='password']").text("Password");
+        $("#password").attr("placeholder", "Password");
+        $(".username-field").hide(); // Username alanını gizle
+        $(".register").html("Not a member? <a href='#' class='register-link'>Register</a>");
+        $(".btn-primary-login").text("Submit");
+      }
+    });
+  });
+</script>
+
+</body>
