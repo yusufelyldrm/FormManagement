@@ -1,0 +1,35 @@
+﻿@model List<FormManagementWebApp.Models.Domain.Form>
+
+@{
+    ViewBag.Title = "Form Page";
+    Layout = "_Layout";
+}
+
+<h2>Forms</h2>
+
+<a class="btn btn-primary">Form Oluştur</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Form Name</th>
+            <th>Description</th>
+            <th>Created Date</th>
+            <th>Created By</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var form in Model)
+        {
+            <tr>
+                <td>@form.Id</td>
+                <td>@form.Name</td>
+                <td>@form.Description</td>
+                <td>@form.CreatedAt.ToString("yyyy-MM-dd")</td>
+                <td>@form.CreatedBy</td>
+            </tr>
+        }
+    </tbody>
+</table>
+}
